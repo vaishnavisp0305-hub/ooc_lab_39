@@ -14,7 +14,7 @@ string line;
 // by default ios::out mode, automatically deletes
 // the content of the file. To append the content, open in ios:app
 // fout.open("sample.txt", ios::app)
-fout.open("sample.txt");
+fout.open("sample.txt",ios:: );
 // Execute a loop If file successfully opened
 while (fout) {
 // Read a Line from standard input
