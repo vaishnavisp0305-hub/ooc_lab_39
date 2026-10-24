@@ -1,0 +1,18 @@
+// C++ program to demonstate the use of try,catch and throw in exception handling.
+#include <iostream>
+using namespace std;
+
+double division(int a, int b) {
+
+return (a/b);
+}
+
+int main () {
+int x = 50;
+int y = 0;
+double z = 0;
+z = division(x,y);
+cout<<z<<endl;
+cout<<"vaishnavi"<<endl;
+return 0;
+}

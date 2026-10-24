@@ -17,9 +17,10 @@ double z = 0;
 try {
 z = division(x, y);
 cout << z << endl;
-} catch (const char* msg) {
-cerr << msg << endl;
-}
-
+} 
+//catch (const char* msg) {
+ //cerr << msg << endl;
+ //}
+cout<<"vaishnavi"<<endl;
 return 0;
 }
