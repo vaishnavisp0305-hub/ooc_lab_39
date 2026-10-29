@@ -1,144 +1,206 @@
-
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include <string>
 using namespace std;
 
-class Account {
-protected:
-    int accountNumber;
+// 1. Class and 2. Encapsulation
+class Student {
+private:
+    int id;
     string name;
-    double balance;
+    float marks;
 
 public:
-    Account(int accNo, string n, double b) {
-        accountNumber = accNo;
-        name = n;
-        balance = b;
+    // 3. Constructor
+    Student(int i = 0, string n = "", float m = 0)
+        : id(i), name(n), marks(m) {}
+
+    int getId() const {
+        return id;
     }
 
-    void deposit(double amount) {
-        if (amount > 0) {
-            balance += amount;
-            cout << "Amount deposited successfully.\n";
-        } else {
-            cout << "Invalid amount!\n";
+    string getName() const {
+        return name;
+    }
+
+    float getMarks() const {
+        return marks;
+    }
+
+    // 5. Polymorphism: Function overloading
+    virtual void display() const {
+        cout << "ID: " << id
+             << ", Name: " << name
+             << ", Marks: " << marks << endl;
+    }
+
+    void display(string heading) const {
+        cout << heading << endl;
+        display();
+    }
+};
+
+// 4. Inheritance
+class Result : public Student {
+public:
+    Result(int i = 0, string n = "", float m = 0)
+        : Student(i, n, m) {}
+
+    void display() const override {
+        Student::display();
+        cout << "Grade: ";
+
+        if (getMarks() >= 90)
+            cout << "A";
+        else if (getMarks() >= 75)
+            cout << "B";
+        else if (getMarks() >= 50)
+            cout << "C";
+        else
+            cout << "Fail";
+
+        cout << endl;
+    }
+};
+
+// 6. File Handling
+void saveRecords(const vector<Result>& students) {
+    ofstream file("students.txt");
+
+    for (const Result& s : students) {
+        file << s.getId() << "|"
+             << s.getName() << "|"
+             << s.getMarks() << endl;
+    }
+
+    file.close();
+    cout << "Records saved successfully!\n";
+}
+
+void loadRecords(vector<Result>& students) {
+    ifstream file("students.txt");
+    string line;
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string id, name, marks;
+
+        if (getline(ss, id, '|') &&
+            getline(ss, name, '|') &&
+            getline(ss, marks)) {
+            students.emplace_back(
+                stoi(id), name, stof(marks));
         }
     }
 
-    virtual void withdraw(double amount) {
-        if (amount > 0 && amount <= balance) {
-            balance -= amount;
-            cout << "Withdrawal successful.\n";
-        } else {
-            cout << "Insufficient balance or invalid amount!\n";
-        }
-    }
-
-    virtual void statement() {
-        cout << "\nAccount Number: " << accountNumber;
-        cout << "\nAccount Holder: " << name;
-        cout << "\nBalance: Rs. " << balance << endl;
-    }
-
-    virtual ~Account() {}
-};
-
-class SavingsAccount : public Account {
-public:
-    SavingsAccount(int accNo, string n, double b)
-        : Account(accNo, n, b) {}
-
-    void statement() override {
-        cout << "\n--- Savings Account Statement ---\n";
-        Account::statement();
-    }
-};
-
-class CheckingAccount : public Account {
-public:
-    CheckingAccount(int accNo, string n, double b)
-        : Account(accNo, n, b) {}
-
-    void statement() override {
-        cout << "\n--- Checking Account Statement ---\n";
-        Account::statement();
-    }
-};
+    file.close();
+}
 
 int main() {
-    int choice, type, accNo;
-    string name;
-    double balance, amount;
+    vector<Result> students;
+    loadRecords(students);
 
-    cout << "Select Account Type:\n";
-    cout << "1. Savings Account\n";
-    cout << "2. Checking Account\n";
-    cout << "Enter choice: ";
-    cin >> type;
-
-    cout << "Enter Account Number: ";
-    cin >> accNo;
-
-    cout << "Enter Account Holder Name: ";
-    cin >> ws;
-    getline(cin, name);
-
-    cout << "Enter Initial Balance: ";
-    cin >> balance;
-
-    if (balance < 0) {
-        cout << "Invalid initial balance!\n";
-        return 0;
-    }
-
-    SavingsAccount savings(accNo, name, balance);
-    CheckingAccount checking(accNo, name, balance);
-
-    Account* account;
-
-    if (type == 1)
-        account = &savings;
-    else if (type == 2)
-        account = &checking;
-    else {
-        cout << "Invalid account type!\n";
-        return 0;
-    }
+    int choice;
 
     do {
-        cout << "\n--- Banking Menu ---\n";
-        cout << "1. Deposit\n";
-        cout << "2. Withdraw\n";
-        cout << "3. Account Statement\n";
-        cout << "4. Exit\n";
+        cout << "\n--- STUDENT MANAGEMENT SYSTEM ---\n";
+        cout << "1. Add Student\n";
+        cout << "2. Display All Students\n";
+        cout << "3. Search Student\n";
+        cout << "4. Calculate Result\n";
+        cout << "5. Save Records\n";
+        cout << "6. Exit\n";
         cout << "Enter choice: ";
         cin >> choice;
 
-        switch (choice) {
-        case 1:
-            cout << "Enter deposit amount: ";
-            cin >> amount;
-            account->deposit(amount);
-            break;
+        if (choice == 1) {
+            int id;
+            string name;
+            float marks;
 
-        case 2:
-            cout << "Enter withdrawal amount: ";
-            cin >> amount;
-            account->withdraw(amount);
-            break;
+            cout << "Enter student ID: ";
+            cin >> id;
 
-        case 3:
-            account->statement();
-            break;
+            bool exists = false;
+            for (const Result& s : students) {
+                if (s.getId() == id) {
+                    exists = true;
+                    break;
+                }
+            }
 
-        case 4:
-            cout << "Thank you for using the banking system!\n";
-            break;
+            if (exists) {
+                cout << "Student ID already exists!\n";
+                continue;
+            }
 
-        default:
+            cout << "Enter student name: ";
+            getline(cin >> ws, name);
+
+            cout << "Enter marks (0-100): ";
+            cin >> marks;
+
+            if (cin.fail() || marks < 0 || marks > 100) {
+                cout << "Invalid marks!\n";
+                cin.clear();
+                cin.ignore(10000, '\n');
+                continue;
+            }
+
+            students.emplace_back(id, name, marks);
+            cout << "Student added successfully!\n";
+            saveRecords(students);
+        }
+
+        else if (choice == 2) {
+            if (students.empty()) {
+                cout << "No student records found.\n";
+            } else {
+                for (const Result& s : students)
+                    s.display();
+            }
+        }
+
+        else if (choice == 3) {
+            int id;
+            cout << "Enter student ID to search: ";
+            cin >> id;
+
+            bool found = false;
+
+            for (const Result& s : students) {
+                if (s.getId() == id) {
+                    s.display("Student Found:");
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                cout << "Student not found.\n";
+        }
+
+        else if (choice == 4) {
+            for (const Result& s : students)
+                s.display();
+        }
+
+        else if (choice == 5) {
+            saveRecords(students);
+        }
+
+        else if (choice == 6) {
+            saveRecords(students);
+            cout << "Exiting program. Goodbye!\n";
+        }
+
+        else {
             cout << "Invalid choice!\n";
         }
-    } while (choice != 4);
+
+    } while (choice != 6);
 
     return 0;
 }
